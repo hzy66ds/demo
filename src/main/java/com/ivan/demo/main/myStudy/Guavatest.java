@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -18,35 +20,44 @@ public class Guavatest {
 
     private static Logger logger = LoggerFactory.getLogger(Guavatest.class);
 
-    private LoadingCache<String, Integer> testCache = CacheBuilder.newBuilder().
-            refreshAfterWrite(10, TimeUnit.SECONDS).build(
-            new CacheLoader<String, Integer>() {
+    private final ExecutorService executor = Executors.newFixedThreadPool(1);
+
+    private LoadingCache<String, List<String>> testCache = CacheBuilder.newBuilder().
+            refreshAfterWrite(1, TimeUnit.SECONDS).build(
+            new CacheLoader<String, List<String>>() {
                 @Override
-                public Integer load(String s) {
+                public List<String> load(String s) {
                     logger.info("load--------------key:" + s);
-                    return Integer.valueOf(s);
+                    List<String> list = new ArrayList<>();
+                    list.add("1");
+                    list.add("2");
+                    list.add("3");
+                    return list;
                 }
 
                 @Override
-                public ListenableFuture<Integer> reload(String key, Integer oldValue) {
+                public ListenableFuture<List<String>> reload(String key, List<String> oldValue) {
                     logger.info("reload--------------key:" + key);
-                    ListenableFutureTask<Integer> task = ListenableFutureTask.create(() -> {
-                                for (int i = 0; i < 200000; i++) {
+                    ListenableFutureTask<List<String>> task = ListenableFutureTask.create(() -> {
+                                for (int i = 0; i < 10000; i++) {
                                     logger.info("start");
                                     logger.info(String.valueOf(i));
                                     logger.info("end");
                                 }
-                                return 666;
+                                List<String> list = new ArrayList<>();
+                                list.add("4");
+                                list.add("5");
+                                list.add("6");
+                                return list;
                             }
                     );
-                    ExecutorService executor = Executors.newFixedThreadPool(1);
                     executor.execute(task);
                     return task;
                 }
             }
     );
 
-    public Integer get(String key) {
+    public List<String> get(String key) {
         return testCache.getUnchecked(key);
     }
 }

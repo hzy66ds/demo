@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 public class GuavaController {
 
@@ -13,7 +15,7 @@ public class GuavaController {
     private Guavatest guavatest;
 
     @GetMapping("/guava/get")
-    public Integer getFromGuavaCache(String key){
+    public List<String> getFromGuavaCache(String key) {
         return guavatest.get(key);
     }
 }
